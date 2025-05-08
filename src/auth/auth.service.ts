@@ -1,0 +1,51 @@
+// auth.service.ts
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import * as bcrypt from 'bcryptjs';
+import { JwtService } from '@nestjs/jwt';
+import { SignupDTO, LoginDTO } from './DTO/auth.dto';
+import { User } from 'src/auth/schemas/user.schema';
+import { JwtPayload } from 'jsonwebtoken';
+
+@Injectable()
+export class AuthService {
+    constructor(
+        @InjectModel(User.name) private userModel: Model<User>,
+        private jwtService: JwtService,
+    ) { }
+
+    async SignUp(signUpDto: SignupDTO): Promise<{ token: string }> {
+        const { password, roles } = signUpDto;
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = await this.userModel.create({
+            ...signUpDto,
+            password: hashedPassword,
+            roles: Array.isArray(roles) ? roles : [roles]
+        });
+
+        const payload: JwtPayload = { id: user._id, roles: user.roles };
+        const token = this.jwtService.sign(payload);
+
+        return { token };
+    }
+
+    async Login(loginDTO: LoginDTO): Promise<{ token: string }> {
+        const { email, password } = loginDTO;
+        const user = await this.userModel.findOne({ email });
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if (!isPasswordMatch) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const payload: JwtPayload = { id: user._id, roles: user.roles };
+        const token = await this.jwtService.sign(payload);
+        return { token };
+    }
+}
