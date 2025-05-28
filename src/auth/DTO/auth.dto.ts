@@ -1,8 +1,11 @@
 import { IsArray, IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
 import { Role } from "../enums/role.enum";
 
-export class SignupDTO
-{
+export class RegisterDTO
+{   
+    @IsNotEmpty()
+    @IsString()
+    readonly name: string;
 
     @IsNotEmpty()
     @IsEmail({}, { message: 'Please enter correct email' })
@@ -16,12 +19,10 @@ export class SignupDTO
     @IsArray()
     @IsString({ each: true })
     roles: string[];
-
 }
 
 export class LoginDTO
 {
-
     @IsNotEmpty()
     @IsEmail({}, { message: 'Please enter correct email' })
     readonly email: string;

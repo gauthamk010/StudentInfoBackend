@@ -23,6 +23,11 @@ export class StudentService
     private authService: AuthService
     ) {}
 
+    async studentCount(): Promise<number> {
+      const count = await this.studentModel.countDocuments();
+      return count;
+    }
+
     async createStudent(createstudentDto: CreateStudentDTO) 
     {
       try {

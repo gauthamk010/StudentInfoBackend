@@ -5,6 +5,9 @@ import { Role } from 'src/auth/enums/role.enum'
 @Schema({ collection: 'students', timestamps: true })
 export class User extends Document{
 
+    @Prop({ required: true })
+    name: string;
+
     @Prop({ required: true, unique: [true, 'Email already exists']})
     email: string;
   

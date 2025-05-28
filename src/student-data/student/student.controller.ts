@@ -32,6 +32,12 @@ export class StudentController {
     return this.studentService.findOneStudent(userId);
   }
   
+  @Get('count')
+  @Roles(Role.Admin)
+  async studentCount() {
+    const studentCount = await this.studentService.studentCount();
+    return studentCount;
+  }
 
   @Put('update/:id')
   @Roles(Role.Admin)
